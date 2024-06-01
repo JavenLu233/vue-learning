@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <span id="ref-value">
+      </span>
+      <span id="ref-value-2"></span>
+      <button id="ref">点击增加数值</button>
+    </div>
+    
+  </div>
+
+  <script type="module">
+    import { ref } from "./ref.js";
+    import { effect } from "./effect.js";
+    const myRef = ref(666);
+    effect(() => {
+      document.querySelector("#ref-value").innerText = "myRef.value = " + myRef.value;
+      document.querySelector("#ref-value-2").innerText = "another:" + (myRef.value % 100 + 10000);
+    })
+
+    const refBtn = document.getElementById("ref");
+    refBtn.addEventListener("click", () => {
+      myRef.value++;
+    })
+
+    // setTimeout(() => {
+    //   myRef.value = 233;
+    //   console.log(myRef);
+    //   // console.log(run(), testNum);
+    // }, 2000);
+
+    // let testNum = 0;
+    // const run = () => {
+    //   try {
+    //     console.log("run的try");
+    //     testNum = 1;
+    //     return "运行了run并且return";
+    //   } finally {
+    //     console.log("run的finally");
+    //     testNum = 2; // 最终testNum为2
+    //     return "finally!" // 最终return了finally的东西
+    //   }
+    // }
+
+  </script>
+  
+</body>
+</html>

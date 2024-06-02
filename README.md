@@ -4,3 +4,7 @@
 ## 更新记录
  - 简易ref
  - 简易computed
+
+## 运行
+ - 命令行输入 `tsc` 编译所有 .ts 文件，输出目录为 `/dist`
+ - 在 `dist/index.html` 处开启 live-server 即可

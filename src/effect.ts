@@ -6,9 +6,10 @@ export let shouldTrack = true;
 
 export class ReactiveEffect<T = any> {
   // active = true
-  deps: Dep[] = []
-  dirty: boolean = false
-  computed?: ComputedRefImpl<T>
+  deps: Dep[] = [];
+  dirty: boolean = false;
+  computed?: ComputedRefImpl<T>;
+  private _running: number = 0;
 
   constructor(
     public fn: () => T,
@@ -21,9 +22,11 @@ export class ReactiveEffect<T = any> {
     this.dirty = false;
     let lastEffect = activeEffect;
     try {
+      this._running++;
       activeEffect = this;
       return this.fn()
     } finally {
+      this._running--;
       activeEffect = lastEffect;
     }
   }
@@ -36,7 +39,6 @@ export interface ReactiveEffectRunner<T = any> {
 
 
 export function effect<T = any>(fn: () => T): any {
-  console.log("生成effect实例", fn);
   // 如果已经生成过实例了，就直接返回实例上挂载的fn即可，不需要重复生成
   if ((fn as ReactiveEffectRunner).effect instanceof ReactiveEffect) {
     fn = (fn as ReactiveEffectRunner).effect.fn
@@ -69,9 +71,9 @@ export function trackEffects(
   dep: Dep,
 ) {
   // 先清理旧dep然后再重新绑定
+  // console.log("trackEffects当前的activeEffect", activeEffect);
   cleanupDepEffect(dep, effect);
   const idx = activeEffect.deps.indexOf(dep);
-  console.log("idx", idx);
   if (idx >= 0) {
     activeEffect.deps.splice(idx, 1);
   }
@@ -87,7 +89,7 @@ export function triggerEffects(dep: Dep) {
   
   for (const effect of Array.isArray(dep) ? dep : [...dep]) {
     let tracking = dep.has(effect);
-    if (!tracking) continue;
+    if (!tracking || effect._running) continue;
 
     effect.dirty = true;
     effect.trigger();

@@ -11,7 +11,22 @@
       <span id="ref-value">
       </span>
       <span id="ref-value-2"></span>
-      <button id="ref">点击增加数值</button>
+      
+      <button id="ref1">点击增加myRef1数值</button>
+      
+    </div>
+    <div>
+      <span id="ref-value-3"></span>
+      <button id="ref2">点击增加myRef2数值</button>
+    </div>
+
+    <div>
+      <span id="computed-value">
+      </span>
+      <button id="computed">alert myComputed1.value</button>
+    </div>
+    <div>
+      <span id="computed-value-2"></span>
     </div>
     
   </div>
@@ -19,17 +34,46 @@
   <script type="module">
     import { ref } from "./ref.js";
     import { effect } from "./effect.js";
+    import { computed } from "./computed.js"
     const myRef = ref(666);
     effect(() => {
       document.querySelector("#ref-value").innerText = "myRef.value = " + myRef.value;
-      document.querySelector("#ref-value-2").innerText = "another:" + (myRef.value % 100 + 10000);
+      document.querySelector("#ref-value-2").innerText = "after some op:" + (myRef.value % 100 + 10000);
+    })
+    const myRef2 = ref(111);
+    effect(() => {
+      document.querySelector("#ref-value-3").innerText = "myRef2.value = " + myRef2.value;
     })
 
-    const refBtn = document.getElementById("ref");
-    refBtn.addEventListener("click", () => {
+    const myComputed = computed(() => {
+      console.log("传入computed中的getter");
+      return myRef.value + myRef2.value
+    });
+
+    effect(() => {
+      document.querySelector("#computed-value").innerText = "(myRef1.value + myRef2.vale) myComputed.value = " + myComputed.value;
+    })
+    
+    const myComputed2 = computed(() => myComputed.value - myRef2.value);
+    effect(() => {
+      document.querySelector("#computed-value-2").innerText = "(myComputed.value - myRef2.value) myComputed2.value = " + myComputed2.value;
+    })
+
+    const ref1Btn = document.getElementById("ref1");
+    ref1Btn.addEventListener("click", () => {
       myRef.value++;
+      console.log("myComputed", myComputed);
     })
 
+    const ref2Btn = document.getElementById("ref2");
+    ref2Btn.addEventListener("click", () => {
+      myRef2.value++;
+    })
+
+    const computed1Btn = document.getElementById("computed");
+    computed1Btn.addEventListener("click", () => {
+      alert(myComputed.value);
+    })
     // setTimeout(() => {
     //   myRef.value = 233;
     //   console.log(myRef);

@@ -8,21 +8,23 @@ export class ReactiveEffect {
         // active = true
         this.deps = [];
         this.dirty = false;
+        this._running = 0;
     }
     run() {
         this.dirty = false;
         let lastEffect = activeEffect;
         try {
+            this._running++;
             activeEffect = this;
             return this.fn();
         }
         finally {
+            this._running--;
             activeEffect = lastEffect;
         }
     }
 }
 export function effect(fn) {
-    console.log("生成effect实例", fn);
     // 如果已经生成过实例了，就直接返回实例上挂载的fn即可，不需要重复生成
     if (fn.effect instanceof ReactiveEffect) {
         fn = fn.effect.fn;
@@ -45,9 +47,9 @@ export function cleanupDepEffect(dep, effect) {
 }
 export function trackEffects(effect, dep) {
     // 先清理旧dep然后再重新绑定
+    // console.log("trackEffects当前的activeEffect", activeEffect);
     cleanupDepEffect(dep, effect);
     const idx = activeEffect.deps.indexOf(dep);
-    console.log("idx", idx);
     if (idx >= 0) {
         activeEffect.deps.splice(idx, 1);
     }
@@ -58,7 +60,7 @@ export function trackEffects(effect, dep) {
 export function triggerEffects(dep) {
     for (const effect of Array.isArray(dep) ? dep : [...dep]) {
         let tracking = dep.has(effect);
-        if (!tracking)
+        if (!tracking || effect._running)
             continue;
         effect.dirty = true;
         effect.trigger();
